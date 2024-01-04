@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SOCKET IO CLIENT</title>
+
+    <!-- Подключение библиотеки socket.io -->
+    <script src="https://cdn.socket.io/4.3.2/socket.io.js"></script>
+
+</head>
+<body>
+
+<h1>SOCKET IO CLIENT</h1>
+<div>
+    <label for="input_message">Введите текст для отправки</label>
+    <input id="input_message" type="text">
+    <button onclick="sendMessage()">Отправить</button>
+</div>
+
+<div id="server_response"></div>
+
+<script>
+    // Подключение к серверу socket.io
+    const socket = io('http://localhost:8080');
+
+    // Обработчик события подключения к серверу
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    // Обработчик события отключения от сервера
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+
+    // Обработка пользовательского события с сервера
+    socket.on('my_message', (data) => {
+        console.log('Received data from server:', data);
+        document.getElementById('server_response').innerText = `Server Response: ${data.message}`;
+    });
+
+    // Функция отправки сообщения на сервер
+    function sendMessage() {
+        const message = document.getElementById('input_message').value;
+        socket.emit('chat_message', { message });
+    }
+</script>
+
+</body>
+</html>

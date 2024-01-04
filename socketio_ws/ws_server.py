@@ -4,7 +4,7 @@ from aiohttp import web
 import socketio
 
 # Создается объект сервера sio для обработки событий веб-сокета.
-sio = socketio.AsyncServer()
+sio = socketio.AsyncServer(cors_allowed_origins='*')
 # Создается объект приложения ws_app из aiohttp
 ws_app = web.Application()
 # Присоединяет объект сервера sio к объекту приложения ws_app.
