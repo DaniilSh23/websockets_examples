@@ -23,16 +23,18 @@ async def index(request):
 
 # Это декораторы, указывающие на события WebSocket.
 @sio.event
-def connect(sid, environ):
+def connect(sid, environ, *args, **kwargs):
     """
     Вызывается при подключении клиента. Сообщение "connect" идентифицирует клиента по sid.
     """
-    print("connect ", sid)
-    print("environ --- ", environ)
+    print("connect: ", sid)
+    print("environ: ", environ)
+    print("args: ", args)
+    print("kwargs: ", kwargs)
 
 
 @sio.event
-async def chat_message(sid, data):
+async def client_event(sid, data):
     """
     Обрабатывает событие получения сообщения от клиента. Выводит содержимое сообщения в консоль.
     Затем отвечает фразой: 'Все говорять <message from client>, а ты купи слона!'

@@ -17,11 +17,25 @@
     <button onclick="sendMessage()">Отправить</button>
 </div>
 
-<div id="server_response"></div>
+<div>
+    <h4>SERVER RESPONSE: <code id="server_response"></code></h4>
+</div>
 
 <script>
+    // СЮДА ВСТАВЛЯЕМ JWT ТОКЕН
+    const jwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3Nzd9.np9OFVyARz2PgpYOdIgoor3kmv8Y48JdeU8dxotCAnc'
+
     // Подключение к серверу socket.io
-    const socket = io('http://localhost:8080');
+    const socket = io(
+        'http://localhost:8080',
+        {
+            auth: {
+
+                token: jwtToken,
+                hueken: 'hueken_val'
+            }
+        }
+    );
 
     // Обработчик события подключения к серверу
     socket.on('connect', () => {
@@ -34,15 +48,15 @@
     });
 
     // Обработка пользовательского события с сервера
-    socket.on('my_message', (data) => {
+    socket.on('server_event', (data) => {
         console.log('Received data from server:', data);
-        document.getElementById('server_response').innerText = `Server Response: ${data.message}`;
+        document.getElementById('server_response').innerText = `${data.message}`;
     });
 
     // Функция отправки сообщения на сервер
     function sendMessage() {
         const message = document.getElementById('input_message').value;
-        socket.emit('chat_message', { message });
+        socket.emit('client_event', { message });
     }
 </script>
 
