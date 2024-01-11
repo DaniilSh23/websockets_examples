@@ -11,26 +11,46 @@
 <body>
 
 <h1>SOCKET IO CLIENT</h1>
+<hr>
+
 <div>
+    <h2>Попробовать веб-сокет</h2>
+    <input type="hidden" id="jwt_token" value="{{ jwt_token }}">
     <label for="input_message">Введите текст для отправки</label>
     <input id="input_message" type="text">
     <button onclick="sendMessage()">Отправить</button>
-</div>
-
-<div>
     <h4>SERVER RESPONSE: <code id="server_response"></code></h4>
 </div>
 
+<hr>
+
+<div>
+    <h2>Задать вопрос модели AI (через веб-приложение)</h2>
+    <label for="input_message_for_ai">Введите текст для отправки</label>
+    <input id="input_message_for_ai" type="text">
+    <button onclick="sendMessageToAI()">Отправить</button>
+    <h4>AI RESPONSE: <code id="ai_response"></code></h4>
+</div>
+
+<hr>
+
+<div>
+    <h2>Задать вопрос модели AI (напрямую. В РФ может не работать)</h2>
+    <label for="input_message_for_ai_right_now">Введите текст для отправки</label>
+    <input id="input_message_for_ai_right_now" type="text">
+    <button onclick="sendMessageToAIRightNow()">Отправить</button>
+    <h4>AI RESPONSE: <code id="ai_response_right_now"></code></h4>
+</div>
+
 <script>
-    // СЮДА ВСТАВЛЯЕМ JWT ТОКЕН
-    const jwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3Nzd9.np9OFVyARz2PgpYOdIgoor3kmv8Y48JdeU8dxotCAnc'
+    const jwtToken = document.getElementById('jwt_token').value;
+    console.log('YOUR JWT TOKEN == ', jwtToken);
 
     // Подключение к серверу socket.io
     const socket = io(
         'http://localhost:8080',
         {
             auth: {
-
                 token: jwtToken,
                 hueken: 'hueken_val'
             }
@@ -48,7 +68,7 @@
     });
 
     // Обработка пользовательского события с сервера
-    socket.on('server_event', (data) => {
+    socket.on('base_server_event', (data) => {
         console.log('Received data from server:', data);
         document.getElementById('server_response').innerText = `${data.message}`;
     });
@@ -58,6 +78,30 @@
         const message = document.getElementById('input_message').value;
         socket.emit('client_event', { message });
     }
+
+    // Функция для отправки сообщения на сервер и последующему запросу к модели AI через сторонее веб-приложение
+    function sendMessageToAI() {
+        const aiMessage = document.getElementById('input_message_for_ai').value;
+        socket.emit('client_event_for_ai', { aiMessage });
+    }
+
+    // Обработка ответа сервера после запроса к нейронке через сторонее веб-приложение
+    socket.on('server_ai_answer', (data) => {
+        console.log('Received data from server (AI Answer):', data);
+        document.getElementById('ai_response').innerText = `${data.message}`;
+    });
+
+    // Функция для отправки сообщения на сервер и последующему запросу к модели AI напрямую
+    function sendMessageToAIRightNow() {
+        const aiMessage = document.getElementById('input_message_for_ai_right_now').value;
+        socket.emit('client_event_for_ai_right_now', { aiMessage });
+    }
+
+    // Обработка ответа сервера после запроса к нейронке напрямую
+    socket.on('server_ai_answer_right_now', (data) => {
+        console.log('Received data from server (AI Answer, right now):', data);
+        document.getElementById('ai_response_right_now').innerText = `${data.message}`;
+    });
 </script>
 
 </body>
