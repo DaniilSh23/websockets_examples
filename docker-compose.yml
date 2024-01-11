@@ -1,0 +1,13 @@
+version: '3'
+services:
+  websocket_example:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    entrypoint: ["/websocket_example/entrypoint.sh"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${PROJECT_VOLUME_PATH}:/websocket_example

@@ -123,5 +123,4 @@ async def render_ws_page(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run(ws_app, host="127.0.0.1", port=8080)
+    uvicorn.run(ws_app, host="0.0.0.0", port=8080)
