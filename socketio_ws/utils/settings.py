@@ -18,7 +18,10 @@ base_templates = Environment(
     autoescape=select_autoescape(["html"]),
 )
 
+# Креды
 SECRET_KEY = "secret_key"
+SOCKET_ADMIN_LOGIN = os.environ.get('SOCKET_ADMIN_LOGIN')
+SOCKET_ADMIN_PASSWORD = os.environ.get('SOCKET_ADMIN_PASSWORD')
 
 # Настройки для работы с AI
 AI_WEBAPP_URL = os.environ.get('AI_WEBAPP_URL')

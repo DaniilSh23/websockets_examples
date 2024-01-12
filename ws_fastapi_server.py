@@ -6,11 +6,20 @@ from fastapi.responses import HTMLResponse
 
 from socketio_ws.utils.auth import authenticate_user, encode_token
 from socketio_ws.utils.project_requests import get_gpt_answer_through_my_webapp, get_gpt_answer
-from socketio_ws.utils.settings import base_templates, MY_LOGGER, PROMPTS
+from socketio_ws.utils.settings import base_templates, MY_LOGGER, PROMPTS, SOCKET_ADMIN_LOGIN, SOCKET_ADMIN_PASSWORD
 
 fs_app = FastAPI()
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins='*')
 ws_app = socketio.ASGIApp(sio, fs_app)  # Регистрируем сервак socket.io и приложение FastAPI
+
+# sio = socketio.Server(cors_allowed_origins=[
+#     'http://localhost:5000',
+#     'https://admin.socket.io',
+# ])
+sio.instrument(auth={
+    'username': SOCKET_ADMIN_LOGIN,
+    'password': SOCKET_ADMIN_PASSWORD,
+})
 
 
 @sio.on("connect")
@@ -123,4 +132,4 @@ async def render_ws_page(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(ws_app, host="0.0.0.0", port=8080)
+    uvicorn.run(ws_app, host="127.0.0.1", port=8080)
