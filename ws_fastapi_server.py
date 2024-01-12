@@ -12,10 +12,7 @@ fs_app = FastAPI()
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins='*')
 ws_app = socketio.ASGIApp(sio, fs_app)  # Регистрируем сервак socket.io и приложение FastAPI
 
-# sio = socketio.Server(cors_allowed_origins=[
-#     'http://localhost:5000',
-#     'https://admin.socket.io',
-# ])
+# Прикручиваем админку (она доступна по адресу: https://admin.socket.io/)
 sio.instrument(auth={
     'username': SOCKET_ADMIN_LOGIN,
     'password': SOCKET_ADMIN_PASSWORD,
@@ -105,7 +102,7 @@ async def send_web_socket_event(message: str, client_sid: str):
     Шлем сообщение клиенту по его sid.
     """
     MY_LOGGER.info(f'Запрос на эндпоинт: /send-ws-event-by-sid')
-    await sio.emit(event='server_event', data={'message': message}, room=client_sid)
+    await sio.emit(event='base_server_event', data={'message': message}, room=client_sid)
 
 
 @fs_app.post(
@@ -116,7 +113,8 @@ async def send_web_socket_event(message: str):
     Шлем сообщение всем, подключенным клиентам.
     """
     MY_LOGGER.info(f'Запрос на эндпоинт: /send-ws-event-for-all')
-    await sio.emit(event='server_event', data={'message': message})
+    result = await sio.emit(event='base_server_event', data={'message': message})
+    MY_LOGGER.info(f'Результат: /send-ws-event-for-all | {result!r}')
 
 
 @fs_app.get(path='/ws-page', response_class=HTMLResponse)
