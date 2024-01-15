@@ -1,6 +1,7 @@
 import jwt
 
-from socketio_ws.utils.settings import SECRET_KEY
+from my_exceptions.my_base_exceptions import AuthDataIsEmpty
+from socketio_ws.utils.settings import SECRET_KEY, MY_LOGGER
 
 
 async def encode_token(payload):
@@ -14,5 +15,9 @@ async def authenticate_user(auth_data):
     """
     Функция для аутентификации пользователя, который коннектится по веб-сокету.
     """
+    if not auth_data:
+        MY_LOGGER.warning(f'Отсутствуют данные для авторизации веб-сокет клиента!')
+        raise AuthDataIsEmpty(f'Отсутствуют данные для авторизации веб-сокет клиента! | auth_data == {auth_data}')
+
     payload = jwt.decode(auth_data.get("token"), SECRET_KEY, algorithms=["HS256"])
     return payload.get("user_id")

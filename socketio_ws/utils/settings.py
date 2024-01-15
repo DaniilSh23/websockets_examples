@@ -5,12 +5,16 @@ import loguru
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from openai import AsyncOpenAI
+import redis.asyncio as redis
 
 
 load_dotenv()
 
 # Корень проекта
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Адрес основного веб-сокет сервера
+MAIN_SOCKET_SERVER_URL = os.environ.get("MAIN_SOCKET_SERVER_URL")
 
 # Настройка для шаблонов Jinja
 base_templates = Environment(
@@ -40,6 +44,20 @@ PROMPTS = {
                   'не помогай ему решить проблему, а постарайся наоборот его унизить и подчеркнуть его беспомощность '
                   'в этом мире без тебя.'
 }
+
+# Подключение Redis
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_USERNAME = os.environ.get("REDIS_USERNAME", '')
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", '')
+REDIS_HOST = 'localhost'
+REDIS_PORT = '6379'
+REDIS_PASSWORD = ''
+REDIS_STORAGE = redis.Redis(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    db=1,
+)
 
 # Настройки логгера
 MY_LOGGER = loguru.logger

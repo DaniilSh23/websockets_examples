@@ -35,16 +35,16 @@ async def disconnect():
     print('disconnected from server')
 
 
-async def send_message(text: str):
+async def send_message(text: str, client_sid: str):
     """
     Функция для отправки сообщения серверу веб-сокета.
     """
-    await sio.emit(event='chat_message', data=text)
+    await sio.emit(event='send_msg_to_user_by_sid', data={"clientMessage": text, "clientSid": client_sid})
 
 
 async def main():
-    await sio.connect('http://localhost:8080')
-    await send_message(text='что делал слон, когда пришел НаПолеОн?')
+    await sio.connect('http://localhost:8081')
+    await send_message(text='что делал слон, когда пришел НаПолеОн?', client_sid='70dBTOUZz5FTXogFAAAA')
     await sio.wait()    # Используется для блокировки основного потока выполнения программы и ожидания событий
 
 

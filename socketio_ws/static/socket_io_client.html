@@ -11,6 +11,14 @@
 <body>
 
 <h1>SOCKET IO CLIENT</h1>
+<h3>SID: <b id="socket_sid"></b></h3>
+<hr>
+
+<div>
+    <h2>🔔 Уведомления</h2>
+    <h4>Новое уведомление: <code id="new_notification"></code></h4>
+</div>
+
 <hr>
 
 <div>
@@ -42,13 +50,25 @@
     <h4>AI RESPONSE: <code id="ai_response_right_now"></code></h4>
 </div>
 
+<hr>
+
+<div>
+    <h2>Отправить сообщение другому клиенту по SID</h2>
+    <label for="input_message_for_other_client">Введите текст для отправки</label>
+    <input id="input_message_for_other_client" type="text">
+    <label for="input_client_sid">Введите SID получателя</label>
+    <input id="input_client_sid" type="text">
+    <button onclick="sendMessageToOtherClient()">Отправить</button>
+    <h4>AI RESPONSE: <code id="message_from_client"></code></h4>
+</div>
+
 <script>
     const jwtToken = document.getElementById('jwt_token').value;
     console.log('YOUR JWT TOKEN == ', jwtToken);
 
     // Подключение к серверу socket.io
     const socket = io(
-        'http://localhost:8080',
+        '{{ host_addr }}',
         {
             auth: {
                 token: jwtToken,
@@ -57,9 +77,19 @@
         }
     );
 
+    // Вызывается в случае апгрейда транспорта сокетов
+    const engine = socket.io.engine;
+    engine.once("upgrade", () => {
+        console.log(engine.transport.name); // in most cases, prints "websocket"
+        console.log('Upgrade transport and change SID. NEW SID: ', socket.id);
+        document.getElementById('socket_sid').innerText = `${socket.id}`;
+    });
+
     // Обработчик события подключения к серверу
     socket.on('connect', () => {
         console.log('Connected to server');
+        console.log('SID: ', socket.id);
+        document.getElementById('socket_sid').innerText = `${socket.id}`;
     });
 
     // Обработчик события отключения от сервера
@@ -101,6 +131,25 @@
     socket.on('server_ai_answer_right_now', (data) => {
         console.log('Received data from server (AI Answer, right now):', data);
         document.getElementById('ai_response_right_now').innerText = `${data.message}`;
+    });
+
+    // Функция для отправки сообщения на сервер для другого клиента по SID
+    function sendMessageToOtherClient() {
+        const clientMessage = document.getElementById('input_message_for_other_client').value;
+        const clientSid = document.getElementById('input_client_sid').value;
+        socket.emit('send_msg_to_user_by_sid', { clientMessage, clientSid });
+    }
+
+    // Обработка ответа сервера после запроса к нейронке через сторонее веб-приложение
+    socket.on('message_from_user', (data) => {
+        console.log('Received data from other client:', data);
+        document.getElementById('message_from_client').innerText = `${data.message}`;
+    });
+
+    // Обработка события от сервера с новым уведомлением
+    socket.on('new_notification', (data) => {
+        console.log('Received notification data:', data);
+        document.getElementById('new_notification').innerText = `${data.message}`;
     });
 </script>
 
